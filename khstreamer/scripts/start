@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# $1 stationid
+# $2 station config file
+
+mkdir -p /var/run/khstreamer
+
+/usr/bin/darkice -c $2 &
+
+echo $! > "/var/run/khstreamer/$1.pid"
+
+

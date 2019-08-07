@@ -1,0 +1,11 @@
+[Unit]
+Description=scheduler for SIP calls and mp3 streams
+Requires=multi-user.target
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/var/lib/meeting_scheduler/meeting_scheduler.py
+
+[Install]
+WantedBy=multi-user.target

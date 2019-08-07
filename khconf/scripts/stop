@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# $1 conference_id
+
+if [ -f "/var/run/khconf/$1.pid" ]; then
+    CONF_PID=$(/bin/cat "/var/run/khconf/$1.pid")
+    /bin/kill -9 $CONF_PID
+    rm -rf "/var/run/khconf/$1.pid"
+fi

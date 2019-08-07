@@ -1,0 +1,11 @@
+[Unit]
+Description=Creates an ALSA loopback from input to effects processor
+Requires=multi-user.target
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/alsaloop --config /etc/alsaloop.conf
+
+[Install]
+WantedBy=multi-user.target
