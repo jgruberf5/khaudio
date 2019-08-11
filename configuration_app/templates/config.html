@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="static/stylesheets/app.css">
+    <script>
+        var data = {{ congregations|safe }};
+
+        function loadCongregations() {
+            if (data.congregations.length == 0) {
+                addCongregation();
+            } else {
+                data.congregations.forEach(function (congobj) {
+                    var option = document.createElement("option");
+                    option.value = congobj.name;
+                    option.text = congobj.name;
+                    document.getElementById('congregation').add(option);
+                });
+                selectCongregation(data.congregations[0].name);
+            }
+            document.getElementById('mainContent').style.display = "block";
+        }
+
+        function persistCongregations() {
+            var req = new XMLHttpRequest()
+            req.open("POST", '/congregations', true);
+            req.setRequestHeader("Content-Type", "application/json");
+            req.onreadystatechange = function() {
+                location.reload();
+            }
+            req.send(JSON.stringify(data));
+        }
+
+        function selectCongregation(congregationName) {
+            data.congregations.forEach(function (congobj) {
+                if (congobj.name == congregationName) {
+                    switch (congobj.publicMeetingDay) {
+                        case 'Sunday':
+                            document.getElementById('publicmeetingday').selectedIndex = "0";
+                            break;
+                        case 'Monday':
+                            document.getElementById('publicmeetingday').selectedIndex = "1";
+                            break;
+                        case 'Tuesday':
+                            document.getElementById('publicmeetingday').selectedIndex = "2";
+                            break;
+                        case 'Wednesday':
+                            document.getElementById('publicmeetingday').selectedIndex = "3";
+                            break;
+                        case 'Thursday':
+                            document.getElementById('publicmeetingday').selectedIndex = "4";
+                            break;
+                        case 'Friday':
+                            document.getElementById('publicmeetingday').selectedIndex = "5";
+                            break;
+                        case 'Saturday':
+                            document.getElementById('publicmeetingday').selectedIndex = "6";
+                            break;
+                    };
+                    document.getElementById('publicmeetingstarthour').selectedIndex = parseInt(congobj.publicMeetingStartTime.split(':')[0]);
+                    document.getElementById('publicmeetingstartminute').selectedIndex = parseInt(congobj.publicMeetingStartTime.split(':')[1]);
+                    document.getElementById('publicmeetingstophour').selectedIndex = parseInt(congobj.publicMeetingStopTime.split(':')[0]);
+                    document.getElementById('publicmeetingstopminute').selectedIndex = parseInt(congobj.publicMeetingStopTime.split(':')[1]);
+                    switch (congobj.midweekMeetingDay) {
+                        case 'Sunday':
+                            document.getElementById('midweekmeetingday').selectedIndex = "0";
+                            break;
+                        case 'Monday':
+                            document.getElementById('midweekmeetingday').selectedIndex = "1";
+                            break;
+                        case 'Tuesday':
+                            document.getElementById('midweekmeetingday').selectedIndex = "2";
+                            break;
+                        case 'Wednesday':
+                            document.getElementById('midweekmeetingday').selectedIndex = "3";
+                            break;
+                        case 'Thursday':
+                            document.getElementById('midweekmeetingday').selectedIndex = "4";
+                            break;
+                        case 'Friday':
+                            document.getElementById('midweekmeetingday').selectedIndex = "5";
+                            break;
+                        case 'Saturday':
+                            document.getElementById('midweekmeetingday').selectedIndex = "6";
+                            break;
+                    };
+                    document.getElementById('midweekmeetingstarthour').selectedIndex = parseInt(congobj.midweekMeetingStartTime.split(':')[0]);
+                    document.getElementById('midweekmeetingstartminute').selectedIndex = parseInt(congobj.midweekMeetingStartTime.split(':')[1]);
+                    document.getElementById('midweekmeetingstophour').selectedIndex = parseInt(congobj.midweekMeetingStopTime.split(':')[0]);
+                    document.getElementById('midweekmeetingstopminute').selectedIndex = parseInt(congobj.midweekMeetingStopTime.split(':')[1]);
+                    if ('khConfPhoneNumber' in congobj) {
+                        document.getElementById('khconfconferencenumber').value = congobj.khConfPhoneNumber;
+                        document.getElementById('khconfadminpin').value = congobj.khConfAdminPIN;
+                        document.getElementById('khconfcallerid').value = congobj.khConfCallerIDNumber;
+                        document.getElementById('khconfenabled').checked = true;
+                    } else {
+                        document.getElementById('khconfenabled').checked = false;
+                        document.getElementById('khconfconfig').style.display = "none";
+                    }
+                    if ('khStreamerAudioServer' in congobj) {
+                        document.getElementById('khstreameraudioserver').value = congobj.khStreamerAudioServer;
+                        document.getElementById('khstreameraudioport').value = congobj.khStreamerAudioServerPort;
+                        document.getElementById('khstreameraudiomountpoint').value = congobj.khStreamerAudioMountPoint;
+                        document.getElementById('khstreameraudiopassword').value = congobj.khStreamerPassword;
+                        document.getElementById('khstreamerenabled').checked = true;
+                    } else {
+                        document.getElementById('khstreamerenabled').checked = false;
+                        document.getElementById('khstreamerconfig').style.display = "none";
+                    }
+                }
+            });
+        }
+
+        function saveCurrentCongregation() {
+            var cong_name = document.getElementById('congregation').value;
+            cong_obj = {
+                "name": cong_name,
+                "publicMeetingDay": document.getElementById('publicmeetingday').value,
+                "publicMeetingStartTime": document.getElementById('publicmeetingstarthour').value + ':' + document.getElementById('publicmeetingstartminute').value,
+                "publicMeetingStopTime": document.getElementById('publicmeetingstophour').value + ':' + document.getElementById('publicmeetingstopminute').value,
+                "midweekMeetingDay": document.getElementById('midweekmeetingday').value,
+                "midweekMeetingStartTime": document.getElementById('midweekmeetingstarthour').value + ':' + document.getElementById('midweekmeetingstartminute').value,
+                "midweekMeetingStopTime": document.getElementById('midweekmeetingstophour').value + ':' + document.getElementById('midweekmeetingstopminute').value,
+            }
+            if (document.getElementById('khconfenabled').checked) {
+                cong_obj.khConfPhoneNumber = parseInt(document.getElementById('khconfconferencenumber').value.replace(/\D/g, ''));
+                cong_obj.khConfAdminPIN = parseInt(document.getElementById('khconfadminpin').value.replace(/\D/g, ''));
+                cong_obj.khConfCallerIDNumber = parseInt(document.getElementById('khconfcallerid').value.replace(/\D/g, ''));
+                cong_obj.khConfSIPGateway = "sipgw.khconf.com";
+            }
+            if (document.getElementById('khstreamerenabled').checked) {
+                cong_obj.khStreamerAudioServer = document.getElementById('khstreameraudioserver').value;
+                cong_obj.khStreamerAudioServerPort = parseInt(document.getElementById('khstreameraudioport').value);
+                cong_obj.khStreamerAudioMountPoint = document.getElementById('khstreameraudiomountpoint').value;
+                cong_obj.khStreamerPassword = document.getElementById('khstreameraudiopassword').value;
+            }
+            var cong_index = -1
+            data.congregations.forEach(function (cong_obj, index) {
+                if (cong_obj.name == cong_name) {
+                    cong_index = index;
+                }
+            })
+            if (cong_index < 0) {
+                cong_index = data.congregations.length;
+            }
+            data.congregations[cong_index] = cong_obj;
+            console.log('saving congregations as:');
+            console.log(JSON.stringify(data.congregations));
+            replaceCongSelector();
+            persistCongregations();
+        }
+
+        function deleteCurrentCongregation() {
+            var cong_name = document.getElementById('congregation').value;
+            var del_index = -1;
+            data.congregations.forEach(function (cong_obj, index) {
+                if (cong_obj.name == cong_name) {
+                    del_index = index;
+                }
+            })
+            if (del_index >= 0) {
+                data.congregations.splice(del_index, 1);
+            }
+            console.log('saving congregations as:');
+            console.log(JSON.stringify(data.congregations));
+            replaceCongSelector();
+            persistCongregations();
+        }
+
+        function addCongregation() {
+            var congSelector = document.getElementById('congregationSelector');
+            congSelector.innerHTML = "<label>Congregation: </label><input id='congregation' size='32'>";
+            document.getElementById('cancelbutton').style.visibility = 'visible';
+            resetForm();
+        }
+
+        function resetForm() {
+            document.getElementById('publicmeetingday').selectedIndex = "0";
+            document.getElementById('publicmeetingstarthour').selectedIndex = "0";
+            document.getElementById('publicmeetingstartminute').selectedIndex = "0";
+            document.getElementById('publicmeetingstophour').selectedIndex = "0";
+            document.getElementById('publicmeetingstopminute').selectedIndex = "0";
+            document.getElementById('khconfenabled').checked = false;
+            isKHConfEnabled();
+            document.getElementById('khstreamerenabled').checked = false;
+            isKHStreamerEnabled();
+        }
+
+        function replaceCongSelector() {
+            var congSelector = document.getElementById('congregationSelector');
+            var newSelector = "<label>Congregation: </label>";
+            newSelector += "<select id='congregation' name='congregation' onchange='javascript:selectCongregation(this.value);'></select>";
+            newSelector += " &nbsp;&nbsp;&nbsp; <input type='button' value='Add Congregation' onclick='javascript:addCongregation();'>";
+            newSelector += " &nbsp;&nbsp;&nbsp; <input type='button' value='Add Congregation' onclick='javascript:deleteCurrentCongregation();'>";
+            congSelector.innerHTML = newSelector;
+        }
+
+        function isKHConfEnabled() {
+            if (document.getElementById('khconfenabled').checked) {
+                document.getElementById('khconfconfig').style.display = "block";
+                return true;
+            } else {
+                document.getElementById('khconfconfig').style.display = "none";
+                return false;
+            }
+        }
+
+        function isKHStreamerEnabled() {
+            if (document.getElementById('khstreamerenabled').checked) {
+                document.getElementById('khstreamerconfig').style.display = "block";
+                return true;
+            } else {
+                document.getElementById('khstreamerconfig').style.display = "none";
+                return false;
+            }
+        }
+    </script>
+    <title>KHAudio Setup</title>
+</head>
+
+<body>
+
+    <div id="mainContent" style="display:none">
+        <h1>KHAudio Configuration</h1>
+        <form>
+            <p>
+                <div id="congregationSelector">
+                    <label>Congregation: </label>
+                    <select id='congregation' name='congregation' onchange='javascript:selectCongregation(this.value);'>
+                    </select>
+                    &nbsp; <input type='button' value='Delete Selected'
+                        onclick='javascript:deleteCurrentCongregation();'>
+                    &nbsp; <input type='button' value='Add New'
+                        onclick='javascript:addCongregation();'>
+                </div>
+            </p>
+            <p>
+                <table>
+                    <tr>
+                        <th>Public Meeting Start Stream: </th>
+                        <td>
+                            <select id='publicmeetingday' name='publicmeeting day'>
+                                <option value='Sunday'>Sunday</option>
+                                <option value='Monday'>Monday</option>
+                                <option value='Tuesday'>Tuesday</option>
+                                <option value='Wednesday'>Wednesday</option>
+                                <option value='Thursday'>Thursday</option>
+                                <option value='Friday'>Friday</option>
+                                <option value='Saturday'>Saturday</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select id='publicmeetingstarthour'>
+                                <option value='0'>0</option>
+                                <option value='1'>1</option>
+                                <option value='2'>2</option>
+                                <option value='3'>3</option>
+                                <option value='4'>4</option>
+                                <option value='5'>5</option>
+                                <option value='6'>6</option>
+                                <option value='7'>7</option>
+                                <option value='8'>8</option>
+                                <option value='9'>9</option>
+                                <option value='10'>10</option>
+                                <option value='11'>11</option>
+                                <option value='12'>12</option>
+                                <option value='13'>13</option>
+                                <option value='14'>14</option>
+                                <option value='15'>15</option>
+                                <option value='16'>16</option>
+                                <option value='17'>17</option>
+                                <option value='18'>18</option>
+                                <option value='19'>19</option>
+                                <option value='20'>20</option>
+                                <option value='21'>21</option>
+                                <option value='22'>22</option>
+                                <option value='23'>23</option>
+                            </select>
+                            :
+                            <select id='publicmeetingstartminute'>
+                                <option value='00'>00</option>
+                                <option value='01'>01</option>
+                                <option value='02'>02</option>
+                                <option value='03'>03</option>
+                                <option value='04'>04</option>
+                                <option value='05'>05</option>
+                                <option value='06'>06</option>
+                                <option value='07'>07</option>
+                                <option value='08'>08</option>
+                                <option value='09'>09</option>
+                                <option value='10'>10</option>
+                                <option value='11'>11</option>
+                                <option value='12'>12</option>
+                                <option value='13'>13</option>
+                                <option value='14'>14</option>
+                                <option value='15'>15</option>
+                                <option value='16'>16</option>
+                                <option value='17'>17</option>
+                                <option value='18'>18</option>
+                                <option value='19'>19</option>
+                                <option value='20'>20</option>
+                                <option value='21'>21</option>
+                                <option value='22'>22</option>
+                                <option value='23'>23</option>
+                                <option value='24'>24</option>
+                                <option value='25'>25</option>
+                                <option value='26'>26</option>
+                                <option value='27'>27</option>
+                                <option value='28'>28</option>
+                                <option value='29'>29</option>
+                                <option value='30'>30</option>
+                                <option value='31'>31</option>
+                                <option value='32'>32</option>
+                                <option value='33'>33</option>
+                                <option value='34'>34</option>
+                                <option value='35'>35</option>
+                                <option value='36'>36</option>
+                                <option value='37'>37</option>
+                                <option value='38'>38</option>
+                                <option value='39'>39</option>
+                                <option value='40'>40</option>
+                                <option value='41'>41</option>
+                                <option value='42'>42</option>
+                                <option value='43'>43</option>
+                                <option value='44'>44</option>
+                                <option value='45'>45</option>
+                                <option value='46'>46</option>
+                                <option value='47'>47</option>
+                                <option value='48'>48</option>
+                                <option value='49'>49</option>
+                                <option value='50'>50</option>
+                                <option value='51'>51</option>
+                                <option value='52'>52</option>
+                                <option value='53'>53</option>
+                                <option value='54'>54</option>
+                                <option value='55'>55</option>
+                                <option value='56'>56</option>
+                                <option value='57'>57</option>
+                                <option value='58'>58</option>
+                                <option value='59'>59</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Public Meeting Stop Stream: </th>
+                        <td>
+                        </td>
+                        <td>
+                            <select id='publicmeetingstophour'>
+                                <option value='0'>0</option>
+                                <option value='1'>1</option>
+                                <option value='2'>2</option>
+                                <option value='3'>3</option>
+                                <option value='4'>4</option>
+                                <option value='5'>5</option>
+                                <option value='6'>6</option>
+                                <option value='7'>7</option>
+                                <option value='8'>8</option>
+                                <option value='9'>9</option>
+                                <option value='10'>10</option>
+                                <option value='11'>11</option>
+                                <option value='12'>12</option>
+                                <option value='13'>13</option>
+                                <option value='14'>14</option>
+                                <option value='15'>15</option>
+                                <option value='16'>16</option>
+                                <option value='17'>17</option>
+                                <option value='18'>18</option>
+                                <option value='19'>19</option>
+                                <option value='20'>20</option>
+                                <option value='21'>21</option>
+                                <option value='22'>22</option>
+                                <option value='23'>23</option>
+                            </select>
+                            :
+                            <select id='publicmeetingstopminute'>
+                                <option value='00'>00</option>
+                                <option value='01'>01</option>
+                                <option value='02'>02</option>
+                                <option value='03'>03</option>
+                                <option value='04'>04</option>
+                                <option value='05'>05</option>
+                                <option value='06'>06</option>
+                                <option value='07'>07</option>
+                                <option value='08'>08</option>
+                                <option value='09'>09</option>
+                                <option value='10'>10</option>
+                                <option value='11'>11</option>
+                                <option value='12'>12</option>
+                                <option value='13'>13</option>
+                                <option value='14'>14</option>
+                                <option value='15'>15</option>
+                                <option value='16'>16</option>
+                                <option value='17'>17</option>
+                                <option value='18'>18</option>
+                                <option value='19'>19</option>
+                                <option value='20'>20</option>
+                                <option value='21'>21</option>
+                                <option value='22'>22</option>
+                                <option value='23'>23</option>
+                                <option value='24'>24</option>
+                                <option value='25'>25</option>
+                                <option value='26'>26</option>
+                                <option value='27'>27</option>
+                                <option value='28'>28</option>
+                                <option value='29'>29</option>
+                                <option value='30'>30</option>
+                                <option value='31'>31</option>
+                                <option value='32'>32</option>
+                                <option value='33'>33</option>
+                                <option value='34'>34</option>
+                                <option value='35'>35</option>
+                                <option value='36'>36</option>
+                                <option value='37'>37</option>
+                                <option value='38'>38</option>
+                                <option value='39'>39</option>
+                                <option value='40'>40</option>
+                                <option value='41'>41</option>
+                                <option value='42'>42</option>
+                                <option value='43'>43</option>
+                                <option value='44'>44</option>
+                                <option value='45'>45</option>
+                                <option value='46'>46</option>
+                                <option value='47'>47</option>
+                                <option value='48'>48</option>
+                                <option value='49'>49</option>
+                                <option value='50'>50</option>
+                                <option value='51'>51</option>
+                                <option value='52'>52</option>
+                                <option value='53'>53</option>
+                                <option value='54'>54</option>
+                                <option value='55'>55</option>
+                                <option value='56'>56</option>
+                                <option value='57'>57</option>
+                                <option value='58'>58</option>
+                                <option value='59'>59</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </p>
+
+            <p>
+                <table>
+                    <tr>
+                        <th>Midweek Meeting Start Stream: </th>
+                        <td>
+                            <select id='midweekmeetingday' name='midweekmeeting day'>
+                                <option value='Sunday'>Sunday</option>
+                                <option value='Monday'>Monday</option>
+                                <option value='Tuesday'>Tuesday</option>
+                                <option value='Wednesday'>Wednesday</option>
+                                <option value='Thursday'>Thursday</option>
+                                <option value='Friday'>Friday</option>
+                                <option value='Saturday'>Saturday</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select id='midweekmeetingstarthour'>
+                                <option value='0'>0</option>
+                                <option value='1'>1</option>
+                                <option value='2'>2</option>
+                                <option value='3'>3</option>
+                                <option value='4'>4</option>
+                                <option value='5'>5</option>
+                                <option value='6'>6</option>
+                                <option value='7'>7</option>
+                                <option value='8'>8</option>
+                                <option value='9'>9</option>
+                                <option value='10'>10</option>
+                                <option value='11'>11</option>
+                                <option value='12'>12</option>
+                                <option value='13'>13</option>
+                                <option value='14'>14</option>
+                                <option value='15'>15</option>
+                                <option value='16'>16</option>
+                                <option value='17'>17</option>
+                                <option value='18'>18</option>
+                                <option value='19'>19</option>
+                                <option value='20'>20</option>
+                                <option value='21'>21</option>
+                                <option value='22'>22</option>
+                                <option value='23'>23</option>
+                            </select>
+                            :
+                            <select id='midweekmeetingstartminute'>
+                                <option value='00'>00</option>
+                                <option value='01'>01</option>
+                                <option value='02'>02</option>
+                                <option value='03'>03</option>
+                                <option value='04'>04</option>
+                                <option value='05'>05</option>
+                                <option value='06'>06</option>
+                                <option value='07'>07</option>
+                                <option value='08'>08</option>
+                                <option value='09'>09</option>
+                                <option value='10'>10</option>
+                                <option value='11'>11</option>
+                                <option value='12'>12</option>
+                                <option value='13'>13</option>
+                                <option value='14'>14</option>
+                                <option value='15'>15</option>
+                                <option value='16'>16</option>
+                                <option value='17'>17</option>
+                                <option value='18'>18</option>
+                                <option value='19'>19</option>
+                                <option value='20'>20</option>
+                                <option value='21'>21</option>
+                                <option value='22'>22</option>
+                                <option value='23'>23</option>
+                                <option value='24'>24</option>
+                                <option value='25'>25</option>
+                                <option value='26'>26</option>
+                                <option value='27'>27</option>
+                                <option value='28'>28</option>
+                                <option value='29'>29</option>
+                                <option value='30'>30</option>
+                                <option value='31'>31</option>
+                                <option value='32'>32</option>
+                                <option value='33'>33</option>
+                                <option value='34'>34</option>
+                                <option value='35'>35</option>
+                                <option value='36'>36</option>
+                                <option value='37'>37</option>
+                                <option value='38'>38</option>
+                                <option value='39'>39</option>
+                                <option value='40'>40</option>
+                                <option value='41'>41</option>
+                                <option value='42'>42</option>
+                                <option value='43'>43</option>
+                                <option value='44'>44</option>
+                                <option value='45'>45</option>
+                                <option value='46'>46</option>
+                                <option value='47'>47</option>
+                                <option value='48'>48</option>
+                                <option value='49'>49</option>
+                                <option value='50'>50</option>
+                                <option value='51'>51</option>
+                                <option value='52'>52</option>
+                                <option value='53'>53</option>
+                                <option value='54'>54</option>
+                                <option value='55'>55</option>
+                                <option value='56'>56</option>
+                                <option value='57'>57</option>
+                                <option value='58'>58</option>
+                                <option value='59'>59</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Midweek Meeting Stop Stream: </th>
+                        <td>
+                        </td>
+                        <td>
+                            <select id='midweekmeetingstophour'>
+                                <option value='0'>0</option>
+                                <option value='1'>1</option>
+                                <option value='2'>2</option>
+                                <option value='3'>3</option>
+                                <option value='4'>4</option>
+                                <option value='5'>5</option>
+                                <option value='6'>6</option>
+                                <option value='7'>7</option>
+                                <option value='8'>8</option>
+                                <option value='9'>9</option>
+                                <option value='10'>10</option>
+                                <option value='11'>11</option>
+                                <option value='12'>12</option>
+                                <option value='13'>13</option>
+                                <option value='14'>14</option>
+                                <option value='15'>15</option>
+                                <option value='16'>16</option>
+                                <option value='17'>17</option>
+                                <option value='18'>18</option>
+                                <option value='19'>19</option>
+                                <option value='20'>20</option>
+                                <option value='21'>21</option>
+                                <option value='22'>22</option>
+                                <option value='23'>23</option>
+                            </select>
+                            :
+                            <select id='midweekmeetingstopminute'>
+                                <option value='00'>00</option>
+                                <option value='01'>01</option>
+                                <option value='02'>02</option>
+                                <option value='03'>03</option>
+                                <option value='04'>04</option>
+                                <option value='05'>05</option>
+                                <option value='06'>06</option>
+                                <option value='07'>07</option>
+                                <option value='08'>08</option>
+                                <option value='09'>09</option>
+                                <option value='10'>10</option>
+                                <option value='11'>11</option>
+                                <option value='12'>12</option>
+                                <option value='13'>13</option>
+                                <option value='14'>14</option>
+                                <option value='15'>15</option>
+                                <option value='16'>16</option>
+                                <option value='17'>17</option>
+                                <option value='18'>18</option>
+                                <option value='19'>19</option>
+                                <option value='20'>20</option>
+                                <option value='21'>21</option>
+                                <option value='22'>22</option>
+                                <option value='23'>23</option>
+                                <option value='24'>24</option>
+                                <option value='25'>25</option>
+                                <option value='26'>26</option>
+                                <option value='27'>27</option>
+                                <option value='28'>28</option>
+                                <option value='29'>29</option>
+                                <option value='30'>30</option>
+                                <option value='31'>31</option>
+                                <option value='32'>32</option>
+                                <option value='33'>33</option>
+                                <option value='34'>34</option>
+                                <option value='35'>35</option>
+                                <option value='36'>36</option>
+                                <option value='37'>37</option>
+                                <option value='38'>38</option>
+                                <option value='39'>39</option>
+                                <option value='40'>40</option>
+                                <option value='41'>41</option>
+                                <option value='42'>42</option>
+                                <option value='43'>43</option>
+                                <option value='44'>44</option>
+                                <option value='45'>45</option>
+                                <option value='46'>46</option>
+                                <option value='47'>47</option>
+                                <option value='48'>48</option>
+                                <option value='49'>49</option>
+                                <option value='50'>50</option>
+                                <option value='51'>51</option>
+                                <option value='52'>52</option>
+                                <option value='53'>53</option>
+                                <option value='54'>54</option>
+                                <option value='55'>55</option>
+                                <option value='56'>56</option>
+                                <option value='57'>57</option>
+                                <option value='58'>58</option>
+                                <option value='59'>59</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </p>
+
+            <p>
+                <div id='khconfenable'>
+                    <label>KHConf enabled: </label><input type='checkbox' id='khconfenabled'
+                        onchange='javascript:isKHConfEnabled()'>
+                </div>
+                <div id='khconfconfig'>
+                    <table>
+                        <tr>
+                            <th>Conference Number: </th>
+                            <td>
+                                <input id='khconfconferencenumber' placeholder='0000000000' size='10' maxlength='10'>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Admin PIN: </th>
+                            <td>
+                                <input id='khconfadminpin' placeholder='000000' size='6' maxlength='6'>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Kingdom Hall Caller ID: </th>
+                            <td>
+                                <input id='khconfcallerid' placeholder='0000000000' size='10' maxlength='10'>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </p>
+
+            <p>
+                <div id='khstreamerenable'>
+                    <label>KHStreamer enabled: </label><input type='checkbox' id='khstreamerenabled'
+                        onchange='javascript:isKHStreamerEnabled()'>
+                </div>
+                <div id='khstreamerconfig'>
+                    <table>
+                        <tr>
+                            <th>Audio Server: </th>
+                            <td>
+                                <input id='khstreameraudioserver' placeholder='cong.khstreamer.org' size='64'
+                                    maxlength='64'>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Audio Server Port: </th>
+                            <td>
+                                <input id='khstreameraudioport' placeholder='8192' size='5' maxlength='5'>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Audio Server Mount Point: </th>
+                            <td>
+                                <input id='khstreameraudiomountpoint' placeholder='listen.mp3' size='32' maxlength='32'>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Audio Server Password: </th>
+                            <td>
+                                <input id='khstreameraudiopassword' placeholder='00000000' size='32' maxlength='32'>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </p>
+            <p>
+                <input type='button' value='Save' onclick='javascript:saveCurrentCongregation();'> &nbsp; <input
+                    id='cancelbutton' type='button' style='visibility: hidden;' value='Cancel'
+                    onclick='javascript:location.reload();'>
+    </div>
+    </p>
+    </form>
+    </div>
+
+    <script>
+        loadCongregations();
+    </script>
+</body>
+
+</html>

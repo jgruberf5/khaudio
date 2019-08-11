@@ -92,7 +92,7 @@ state.Device {
 	control.4 {
 		iface MIXER
 		name 'Mic Playback Volume'
-		value 24
+		value 31
 		comment {
 			access 'read write'
 			type INTEGER
@@ -100,7 +100,7 @@ state.Device {
 			range '0 - 31'
 			dbmin -9999999
 			dbmax 800
-			dbvalue.0 100
+			dbvalue.0 800
 		}
 	}
 	control.5 {
@@ -116,8 +116,8 @@ state.Device {
 	control.6 {
 		iface MIXER
 		name 'Speaker Playback Volume'
-		value.0 30
-		value.1 30
+		value.0 37
+		value.1 37
 		comment {
 			access 'read write'
 			type INTEGER
@@ -125,8 +125,8 @@ state.Device {
 			range '0 - 37'
 			dbmin -9999999
 			dbmax 0
-			dbvalue.0 -700
-			dbvalue.1 -700
+			dbvalue.0 0
+			dbvalue.1 0
 		}
 	}
 	control.7 {
@@ -142,7 +142,7 @@ state.Device {
 	control.8 {
 		iface MIXER
 		name 'Mic Capture Volume'
-		value 30
+		value 31
 		comment {
 			access 'read write'
 			type INTEGER
@@ -150,13 +150,13 @@ state.Device {
 			range '0 - 35'
 			dbmin -1200
 			dbmax 2300
-			dbvalue.0 1800
+			dbvalue.0 1900
 		}
 	}
 	control.9 {
 		iface MIXER
 		name 'Auto Gain Control'
-		value true
+		value false
 		comment {
 			access 'read write'
 			type BOOLEAN
@@ -209,7 +209,7 @@ state.Loopback {
 	control.4 {
 		iface PCM
 		name 'PCM Slave Format'
-		value 10
+		value 2
 		comment {
 			access read
 			type INTEGER

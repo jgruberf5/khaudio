@@ -5,7 +5,7 @@ apt upgrade
 apt-get update -oAquire::AllowInsecureRepositories=true
 apt-get install deb-multimedia-keyring -oAquire::AllowInsecureRepositories=true
 apt-get update
-apt-get install lame libfaac-dev libmp3lame-dev libvorbis-dev libopencore-amrwb-dev libtheora-dev libx11-dev libfdk-aac-dev libopencore-amrnb-dev libasound2-dev libasound2-doc libssl-dev alsa-utils swh-plugin tap-plugins csladspa caps python-schedule python-jinja2
+apt-get install lame libfaac-dev libmp3lame-dev libvorbis-dev libopencore-amrwb-dev libtheora-dev libx11-dev libfdk-aac-dev libopencore-amrnb-dev libasound2-dev libasound2-doc libssl-dev alsa-utils swh-plugin tap-plugins csladspa caps python-schedule python-jinja2 python-psutil
 
 
 cd /usr/src
