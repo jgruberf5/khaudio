@@ -26,7 +26,7 @@ def main():
             # read in meeting metadata
             print('processing scheduled tasks for the %s congregation\n' %
                   cong['name'])
-            id = base64.urlsafe_b64encode(cong['name']).lower()
+            id = base64.urlsafe_b64encode(cong['name'].lower())
             mwmd = cong['midweekMeetingDay'].lower()
             mwm_start = cong['midweekMeetingStartTime']
             mwm_stop = cong['midweekMeetingStopTime']
@@ -35,7 +35,7 @@ def main():
             pm_stop = cong['publicMeetingStopTime']
 
             # setup scheduled tasks for KHConf SIP calls
-            if 'khConfPhoneNumber' in cong:
+            if 'khConfEnabled' in cong and cong['khConfEnabled']:
                 # populate configuration data
                 khconf = jinja2.Template(khconf_template).render(
                     caller_id=cong['khConfCallerIDNumber'],
@@ -68,7 +68,7 @@ def main():
                 getattr(schedule.every(), pmd).at(pm_stop).do(
                     call, stop_script)
             # setup scheduled tasks for KHstreamer mp3 streaming
-            if 'khStreamerAudioServer' in cong:
+            if 'khStreamerEnabled' in cong and cong['khStreamerEnabled']:
                 # populate configuration data
                 khstreamer = jinja2.Template(khstreamer_template).render(
                     audio_server=cong['khStreamerAudioServer'],
@@ -102,8 +102,9 @@ def main():
                     call, stop_script)
             print('\n')
 
-    print('next job will run at: %s\n' %
-          schedule.next_run().strftime("%a %b %d %Y %H:%M:%S"))
+    if schedule.next_run():
+        print('next job will run at: %s\n' %
+              schedule.next_run().strftime("%a %b %d %Y %H:%M:%S"))
 
     while True:
         schedule.run_pending()

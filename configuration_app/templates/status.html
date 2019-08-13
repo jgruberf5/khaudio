@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="static/stylesheets/app.css">
+    <script>
+        var data = {{ status| safe }};
+
+        function loadStatus() {
+            var status_html = '<table><tr><th>Congregation</th><th>KHConf Connected</th><th>KHStreamer Connected</th><th>Controls</th></tr>';
+            data['congregations'].forEach(function(cong) {
+                var row = '<tr><td>' + cong.name + '</td>';
+                if (cong.khConfConnected) {
+                    if (cong.khConfCount != 'Unknown') {
+                        row += '<td>YES Count:' + cong.khConfCount + '</td>';
+                    } else {
+                        row += '<td>YES</td>';
+                    }
+                } else {
+                    row += '<td>NO</td>';
+                }
+                if (cong.khStreamerConnected) {
+                    row += '<td>YES</td>';
+                } else {
+                    row += '<td>NO</td>';
+                }
+                row += '<td>'
+                if (cong.khConfConnected) {
+                   row += '<input type="button" value="Stop KHConf" onclick="javascript:stopKHConf(\'' + cong.name + '\');"/> ';
+                } else {
+                   row += '<input type="button" value="Start KHConf" onclick="javascript:startKHConf(\'' + cong.name + '\');"/> ';
+                }
+                if (cong.khStreamerConnected) {
+                   row += '<input type="button" value="Stop KHStreamer" onclick="javascript:stopKHStreamer(\'' + cong.name + '\');"/> ';
+                } else {
+                   row += '<input type="button" value="Start KHStreamer"  onclick="javascript:startKHSteamer(\'' + cong.name + '\');"/> ';
+                }
+                row += '</td></tr>';
+                status_html += row;
+            });
+            status_html += '</table>'
+            document.getElementById('status').innerHTML = status_html;
+            document.getElementById('mainContent').style.display = "block";
+        }
+
+        function startKHConf(cong_name) {
+            var req = new XMLHttpRequest()
+            cmd = {
+                'action': 'start',
+                'service': 'KHCONF',
+                'name': cong_name
+            }
+            req.open("POST", '/status', true);
+            req.setRequestHeader("Content-Type", "application/json");
+            req.onreadystatechange = function () {
+                location.reload();
+            }
+            req.send(JSON.stringify(cmd));
+        }
+
+        function stopKHConf(cong_name) {
+            var req = new XMLHttpRequest()
+            cmd = {
+                'action': 'stop',
+                'service': 'KHCONF',
+                'name': cong_name
+            }
+            req.open("POST", '/status', true);
+            req.setRequestHeader("Content-Type", "application/json");
+            req.onreadystatechange = function () {
+                location.reload();
+            }
+            req.send(JSON.stringify(cmd));
+        }
+
+        function startKHSteamer(cong_name) {
+            var req = new XMLHttpRequest()
+            cmd = {
+                'action': 'start',
+                'service': 'KHSTREAMER',
+                'name': cong_name
+            }
+            req.open("POST", '/status', true);
+            req.setRequestHeader("Content-Type", "application/json");
+            req.onreadystatechange = function () {
+                location.reload();
+            }
+            req.send(JSON.stringify(cmd));
+        }
+
+        function stopKHStreamer(cong_name) {
+            var req = new XMLHttpRequest()
+            cmd = {
+                'action': 'stop',
+                'service': 'KHSTREAMER',
+                'name': cong_name
+            }
+            req.open("POST", '/status', true);
+            req.setRequestHeader("Content-Type", "application/json");
+            req.onreadystatechange = function () {
+                location.reload();
+            }
+            req.send(JSON.stringify(cmd));
+        }
+
+    </script>
+    <title>KHAudio Setup</title>
+</head>
+
+<body>
+    <div id='toolbar'>
+        <input type='button' value='Status' onclick='javascript:location.replace("/");' />
+        <input type='button' value='Config' onclick='javascript:location.replace("/config");' />
+    </div>
+    <div id="mainContent" style="display:none">
+        <h1>KHAudio Status</h1>
+        <div id="status">
+
+        </div>
+    </div>
+
+    <script>
+        loadStatus();
+    </script>
+</body>
+
+</html>

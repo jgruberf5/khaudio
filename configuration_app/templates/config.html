@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="static/stylesheets/app.css">
     <script>
-        var data = {{ congregations|safe }};
+        var data = {{ congregations| safe }};
 
         function loadCongregations() {
             if (data.congregations.length == 0) {
@@ -28,7 +28,7 @@
             var req = new XMLHttpRequest()
             req.open("POST", '/congregations', true);
             req.setRequestHeader("Content-Type", "application/json");
-            req.onreadystatechange = function() {
+            req.onreadystatechange = function () {
                 location.reload();
             }
             req.send(JSON.stringify(data));
@@ -91,23 +91,36 @@
                     document.getElementById('midweekmeetingstartminute').selectedIndex = parseInt(congobj.midweekMeetingStartTime.split(':')[1]);
                     document.getElementById('midweekmeetingstophour').selectedIndex = parseInt(congobj.midweekMeetingStopTime.split(':')[0]);
                     document.getElementById('midweekmeetingstopminute').selectedIndex = parseInt(congobj.midweekMeetingStopTime.split(':')[1]);
-                    if ('khConfPhoneNumber' in congobj) {
+                    if ('khConfEnabled' in congobj && congobj.khConfEnabled) {
                         document.getElementById('khconfconferencenumber').value = congobj.khConfPhoneNumber;
                         document.getElementById('khconfadminpin').value = congobj.khConfAdminPIN;
                         document.getElementById('khconfcallerid').value = congobj.khConfCallerIDNumber;
+                        document.getElementById('khconfcountusername').value = congobj.khConfCountUsername;
+                        document.getElementById('khconfcountpassword').value = congobj.khConfCountPassword;
                         document.getElementById('khconfenabled').checked = true;
+                        document.getElementById('khconfconfig').style.display = "block";
                     } else {
                         document.getElementById('khconfenabled').checked = false;
+                        document.getElementById('khconfconferencenumber').value = congobj.khConfPhoneNumber;
+                        document.getElementById('khconfadminpin').value = congobj.khConfAdminPIN;
+                        document.getElementById('khconfcallerid').value = congobj.khConfCallerIDNumber;
+                        document.getElementById('khconfcountusername').value = congobj.khConfCountUsername;
+                        document.getElementById('khconfcountpassword').value = congobj.khConfCountPassword;
                         document.getElementById('khconfconfig').style.display = "none";
                     }
-                    if ('khStreamerAudioServer' in congobj) {
+                    if ('khStreamerEnabled' in congobj && congobj.khStreamerEnabled) {
                         document.getElementById('khstreameraudioserver').value = congobj.khStreamerAudioServer;
                         document.getElementById('khstreameraudioport').value = congobj.khStreamerAudioServerPort;
                         document.getElementById('khstreameraudiomountpoint').value = congobj.khStreamerAudioMountPoint;
                         document.getElementById('khstreameraudiopassword').value = congobj.khStreamerPassword;
                         document.getElementById('khstreamerenabled').checked = true;
+                        document.getElementById('khstreamerconfig').style.display = "block";
                     } else {
                         document.getElementById('khstreamerenabled').checked = false;
+                        document.getElementById('khstreameraudioserver').value = congobj.khStreamerAudioServer;
+                        document.getElementById('khstreameraudioport').value = congobj.khStreamerAudioServerPort;
+                        document.getElementById('khstreameraudiomountpoint').value = congobj.khStreamerAudioMountPoint;
+                        document.getElementById('khstreameraudiopassword').value = congobj.khStreamerPassword;
                         document.getElementById('khstreamerconfig').style.display = "none";
                     }
                 }
@@ -126,12 +139,30 @@
                 "midweekMeetingStopTime": document.getElementById('midweekmeetingstophour').value + ':' + document.getElementById('midweekmeetingstopminute').value,
             }
             if (document.getElementById('khconfenabled').checked) {
+                cong_obj.khConfEnabled = true;
                 cong_obj.khConfPhoneNumber = parseInt(document.getElementById('khconfconferencenumber').value.replace(/\D/g, ''));
                 cong_obj.khConfAdminPIN = parseInt(document.getElementById('khconfadminpin').value.replace(/\D/g, ''));
                 cong_obj.khConfCallerIDNumber = parseInt(document.getElementById('khconfcallerid').value.replace(/\D/g, ''));
+                cong_obj.khConfCountUsername = document.getElementById('khconfcountusername').value;
+                cong_obj.khConfCountPassword = document.getElementById('khconfcountpassword').value;
+                cong_obj.khConfSIPGateway = "sipgw.khconf.com";
+            } else {
+                cong_obj.khConfEnabled = false;
+                cong_obj.khConfPhoneNumber = parseInt(document.getElementById('khconfconferencenumber').value.replace(/\D/g, ''));
+                cong_obj.khConfAdminPIN = parseInt(document.getElementById('khconfadminpin').value.replace(/\D/g, ''));
+                cong_obj.khConfCallerIDNumber = parseInt(document.getElementById('khconfcallerid').value.replace(/\D/g, ''));
+                cong_obj.khConfCountUsername = document.getElementById('khconfcountusername').value;
+                cong_obj.khConfCountPassword = document.getElementById('khconfcountpassword').value;
                 cong_obj.khConfSIPGateway = "sipgw.khconf.com";
             }
             if (document.getElementById('khstreamerenabled').checked) {
+                cong_obj.khStreamerEnabled = true;
+                cong_obj.khStreamerAudioServer = document.getElementById('khstreameraudioserver').value;
+                cong_obj.khStreamerAudioServerPort = parseInt(document.getElementById('khstreameraudioport').value);
+                cong_obj.khStreamerAudioMountPoint = document.getElementById('khstreameraudiomountpoint').value;
+                cong_obj.khStreamerPassword = document.getElementById('khstreameraudiopassword').value;
+            } else {
+                cong_obj.khStreamerEnabled = false;
                 cong_obj.khStreamerAudioServer = document.getElementById('khstreameraudioserver').value;
                 cong_obj.khStreamerAudioServerPort = parseInt(document.getElementById('khstreameraudioport').value);
                 cong_obj.khStreamerAudioMountPoint = document.getElementById('khstreameraudiomountpoint').value;
@@ -184,8 +215,17 @@
             document.getElementById('publicmeetingstophour').selectedIndex = "0";
             document.getElementById('publicmeetingstopminute').selectedIndex = "0";
             document.getElementById('khconfenabled').checked = false;
+            document.getElementById('khconfconferencenumber').value = '';
+            document.getElementById('khconfadminpin').value = '';
+            document.getElementById('khconfcallerid').value = '';
+            document.getElementById('khconfcountusername').value = '';
+            document.getElementById('khconfcountpassword').value = '';
             isKHConfEnabled();
             document.getElementById('khstreamerenabled').checked = false;
+            document.getElementById('khstreameraudioserver').value = '';
+            document.getElementById('khstreameraudioport').value = '';
+            document.getElementById('khstreameraudiomountpoint').value = '';
+            document.getElementById('khstreameraudiopassword').value = '';
             isKHStreamerEnabled();
         }
 
@@ -222,7 +262,10 @@
 </head>
 
 <body>
-
+    <div id='toolbar'>
+        <input type='button' value='Status' onclick='javascript:location.replace("/");' />
+        <input type='button' value='Config' onclick='javascript:location.replace("/config");' />
+    </div>
     <div id="mainContent" style="display:none">
         <h1>KHAudio Configuration</h1>
         <form>
@@ -233,8 +276,7 @@
                     </select>
                     &nbsp; <input type='button' value='Delete Selected'
                         onclick='javascript:deleteCurrentCongregation();'>
-                    &nbsp; <input type='button' value='Add New'
-                        onclick='javascript:addCongregation();'>
+                    &nbsp; <input type='button' value='Add New' onclick='javascript:addCongregation();'>
                 </div>
             </p>
             <p>
@@ -242,7 +284,7 @@
                     <tr>
                         <th>Public Meeting Start Stream: </th>
                         <td>
-                            <select id='publicmeetingday' name='publicmeeting day'>
+                            <select id='publicmeetingday' name='publicmeetingday'>
                                 <option value='Sunday'>Sunday</option>
                                 <option value='Monday'>Monday</option>
                                 <option value='Tuesday'>Tuesday</option>
@@ -254,30 +296,30 @@
                         </td>
                         <td>
                             <select id='publicmeetingstarthour'>
-                                <option value='0'>0</option>
-                                <option value='1'>1</option>
-                                <option value='2'>2</option>
-                                <option value='3'>3</option>
-                                <option value='4'>4</option>
-                                <option value='5'>5</option>
-                                <option value='6'>6</option>
-                                <option value='7'>7</option>
-                                <option value='8'>8</option>
-                                <option value='9'>9</option>
-                                <option value='10'>10</option>
-                                <option value='11'>11</option>
-                                <option value='12'>12</option>
-                                <option value='13'>13</option>
-                                <option value='14'>14</option>
-                                <option value='15'>15</option>
-                                <option value='16'>16</option>
-                                <option value='17'>17</option>
-                                <option value='18'>18</option>
-                                <option value='19'>19</option>
-                                <option value='20'>20</option>
-                                <option value='21'>21</option>
-                                <option value='22'>22</option>
-                                <option value='23'>23</option>
+                                <option value='0'>0 </option>
+                                <option value='1'>1 </option>
+                                <option value='2'>2 </option>
+                                <option value='3'>3 </option>
+                                <option value='4'>4 </option>
+                                <option value='5'>5 </option>
+                                <option value='6'>6 </option>
+                                <option value='7'>7 </option>
+                                <option value='8'>8 </option>
+                                <option value='9'>9 </option>
+                                <option value='10'>10 </option>
+                                <option value='11'>11 </option>
+                                <option value='12'>12 </option>
+                                <option value='13'>13 </option>
+                                <option value='14'>14 </option>
+                                <option value='15'>15 </option>
+                                <option value='16'>16 </option>
+                                <option value='17'>17 </option>
+                                <option value='18'>18 </option>
+                                <option value='19'>19 </option>
+                                <option value='20'>20 </option>
+                                <option value='21'>21 </option>
+                                <option value='22'>22 </option>
+                                <option value='23'>23 </option>
                             </select>
                             :
                             <select id='publicmeetingstartminute'>
@@ -350,30 +392,30 @@
                         </td>
                         <td>
                             <select id='publicmeetingstophour'>
-                                <option value='0'>0</option>
-                                <option value='1'>1</option>
-                                <option value='2'>2</option>
-                                <option value='3'>3</option>
-                                <option value='4'>4</option>
-                                <option value='5'>5</option>
-                                <option value='6'>6</option>
-                                <option value='7'>7</option>
-                                <option value='8'>8</option>
-                                <option value='9'>9</option>
-                                <option value='10'>10</option>
-                                <option value='11'>11</option>
-                                <option value='12'>12</option>
-                                <option value='13'>13</option>
-                                <option value='14'>14</option>
-                                <option value='15'>15</option>
-                                <option value='16'>16</option>
-                                <option value='17'>17</option>
-                                <option value='18'>18</option>
-                                <option value='19'>19</option>
-                                <option value='20'>20</option>
-                                <option value='21'>21</option>
-                                <option value='22'>22</option>
-                                <option value='23'>23</option>
+                                <option value='0'>0 </option>
+                                <option value='1'>1 </option>
+                                <option value='2'>2 </option>
+                                <option value='3'>3 </option>
+                                <option value='4'>4 </option>
+                                <option value='5'>5 </option>
+                                <option value='6'>6 </option>
+                                <option value='7'>7 </option>
+                                <option value='8'>8 </option>
+                                <option value='9'>9 </option>
+                                <option value='10'>10 </option>
+                                <option value='11'>11 </option>
+                                <option value='12'>12 </option>
+                                <option value='13'>13 </option>
+                                <option value='14'>14 </option>
+                                <option value='15'>15 </option>
+                                <option value='16'>16 </option>
+                                <option value='17'>17 </option>
+                                <option value='18'>18 </option>
+                                <option value='19'>19 </option>
+                                <option value='20'>20 </option>
+                                <option value='21'>21 </option>
+                                <option value='22'>22 </option>
+                                <option value='23'>23 </option>
                             </select>
                             :
                             <select id='publicmeetingstopminute'>
@@ -460,30 +502,30 @@
                         </td>
                         <td>
                             <select id='midweekmeetingstarthour'>
-                                <option value='0'>0</option>
-                                <option value='1'>1</option>
-                                <option value='2'>2</option>
-                                <option value='3'>3</option>
-                                <option value='4'>4</option>
-                                <option value='5'>5</option>
-                                <option value='6'>6</option>
-                                <option value='7'>7</option>
-                                <option value='8'>8</option>
-                                <option value='9'>9</option>
-                                <option value='10'>10</option>
-                                <option value='11'>11</option>
-                                <option value='12'>12</option>
-                                <option value='13'>13</option>
-                                <option value='14'>14</option>
-                                <option value='15'>15</option>
-                                <option value='16'>16</option>
-                                <option value='17'>17</option>
-                                <option value='18'>18</option>
-                                <option value='19'>19</option>
-                                <option value='20'>20</option>
-                                <option value='21'>21</option>
-                                <option value='22'>22</option>
-                                <option value='23'>23</option>
+                                <option value='0'>0 </option>
+                                <option value='1'>1 </option>
+                                <option value='2'>2 </option>
+                                <option value='3'>3 </option>
+                                <option value='4'>4 </option>
+                                <option value='5'>5 </option>
+                                <option value='6'>6 </option>
+                                <option value='7'>7 </option>
+                                <option value='8'>8 </option>
+                                <option value='9'>9 </option>
+                                <option value='10'>10 </option>
+                                <option value='11'>11 </option>
+                                <option value='12'>12 </option>
+                                <option value='13'>13 </option>
+                                <option value='14'>14 </option>
+                                <option value='15'>15 </option>
+                                <option value='16'>16 </option>
+                                <option value='17'>17 </option>
+                                <option value='18'>18 </option>
+                                <option value='19'>19 </option>
+                                <option value='20'>20 </option>
+                                <option value='21'>21 </option>
+                                <option value='22'>22 </option>
+                                <option value='23'>23 </option>
                             </select>
                             :
                             <select id='midweekmeetingstartminute'>
@@ -556,30 +598,30 @@
                         </td>
                         <td>
                             <select id='midweekmeetingstophour'>
-                                <option value='0'>0</option>
-                                <option value='1'>1</option>
-                                <option value='2'>2</option>
-                                <option value='3'>3</option>
-                                <option value='4'>4</option>
-                                <option value='5'>5</option>
-                                <option value='6'>6</option>
-                                <option value='7'>7</option>
-                                <option value='8'>8</option>
-                                <option value='9'>9</option>
-                                <option value='10'>10</option>
-                                <option value='11'>11</option>
-                                <option value='12'>12</option>
-                                <option value='13'>13</option>
-                                <option value='14'>14</option>
-                                <option value='15'>15</option>
-                                <option value='16'>16</option>
-                                <option value='17'>17</option>
-                                <option value='18'>18</option>
-                                <option value='19'>19</option>
-                                <option value='20'>20</option>
-                                <option value='21'>21</option>
-                                <option value='22'>22</option>
-                                <option value='23'>23</option>
+                                <option value='0'>0 </option>
+                                <option value='1'>1 </option>
+                                <option value='2'>2 </option>
+                                <option value='3'>3 </option>
+                                <option value='4'>4 </option>
+                                <option value='5'>5 </option>
+                                <option value='6'>6 </option>
+                                <option value='7'>7 </option>
+                                <option value='8'>8 </option>
+                                <option value='9'>9 </option>
+                                <option value='10'>10 </option>
+                                <option value='11'>11 </option>
+                                <option value='12'>12 </option>
+                                <option value='13'>13 </option>
+                                <option value='14'>14 </option>
+                                <option value='15'>15 </option>
+                                <option value='16'>16 </option>
+                                <option value='17'>17 </option>
+                                <option value='18'>18 </option>
+                                <option value='19'>19 </option>
+                                <option value='20'>20 </option>
+                                <option value='21'>21 </option>
+                                <option value='22'>22 </option>
+                                <option value='23'>23 </option>
                             </select>
                             :
                             <select id='midweekmeetingstopminute'>
@@ -659,19 +701,31 @@
                         <tr>
                             <th>Conference Number: </th>
                             <td>
-                                <input id='khconfconferencenumber' placeholder='0000000000' size='10' maxlength='10'>
+                                <input id='khconfconferencenumber' type='text' placeholder='0000000000' size='10' maxlength='10'>
                             </td>
                         </tr>
                         <tr>
                             <th>Admin PIN: </th>
                             <td>
-                                <input id='khconfadminpin' placeholder='000000' size='6' maxlength='6'>
+                                <input id='khconfadminpin' type='text' placeholder='000000' size='6' maxlength='6'>
                             </td>
                         </tr>
                         <tr>
                             <th>Kingdom Hall Caller ID: </th>
                             <td>
-                                <input id='khconfcallerid' placeholder='0000000000' size='10' maxlength='10'>
+                                <input id='khconfcallerid' type='text' placeholder='0000000000' size='10' maxlength='10'>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>KHConf Count User: </th>
+                            <td>
+                                <input id='khconfcountusername' type='text' placeholder='username' size='24' maxlength='24'>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>KHConf Count Password: </th>
+                            <td>
+                                <input id='khconfcountpassword' type='text' placeholder='password' size='24' maxlength='24'>
                             </td>
                         </tr>
                     </table>
@@ -688,26 +742,26 @@
                         <tr>
                             <th>Audio Server: </th>
                             <td>
-                                <input id='khstreameraudioserver' placeholder='cong.khstreamer.org' size='64'
+                                <input id='khstreameraudioserver' type='text' placeholder='cong.khstreamer.org' size='64'
                                     maxlength='64'>
                             </td>
                         </tr>
                         <tr>
                             <th>Audio Server Port: </th>
                             <td>
-                                <input id='khstreameraudioport' placeholder='8192' size='5' maxlength='5'>
+                                <input id='khstreameraudioport' type='text' placeholder='8192' size='5' maxlength='5'>
                             </td>
                         </tr>
                         <tr>
                             <th>Audio Server Mount Point: </th>
                             <td>
-                                <input id='khstreameraudiomountpoint' placeholder='listen.mp3' size='32' maxlength='32'>
+                                <input id='khstreameraudiomountpoint' type='text' placeholder='listen.mp3' size='32' maxlength='32'>
                             </td>
                         </tr>
                         <tr>
                             <th>Audio Server Password: </th>
                             <td>
-                                <input id='khstreameraudiopassword' placeholder='00000000' size='32' maxlength='32'>
+                                <input id='khstreameraudiopassword' type='text' placeholder='00000000' size='32' maxlength='32'>
                             </td>
                         </tr>
                     </table>
