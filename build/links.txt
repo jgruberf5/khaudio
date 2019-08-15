@@ -1,9 +1,9 @@
 Image with hostap setup for Wifi Initial Configuration
 
-https://www.dropbox.com/s/225kfyo86321opv/khaudio_wifi.img
+https://www.dropbox.com/s/225kfyo86321opv/khaudio_wifi.img?dl=1
 
 Image with Wifi disable, use with wired Ethernet only
 
-https://www.dropbox.com/s/5rm9dstu340z8jq/khaudio_wired.img
+https://www.dropbox.com/s/5rm9dstu340z8jq/khaudio_wired.img?dl=1
 
 
